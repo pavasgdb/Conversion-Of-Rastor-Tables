@@ -6,11 +6,44 @@ from PIL import Image
 import pytesseract
 import cv2
 from numpy import genfromtxt
-from junction_detection import adaptive_threshold
 
 
 
 
+
+def adaptive_threshold(img, process_background=False, blocksize=15, c=-2):
+    """Thresholds an image using OpenCV's adaptiveThreshold.
+    Parameters
+    ----------
+    imagename : string
+    Path to image file.
+    process_background : bool, optional (default: False)
+        Whether or not to process lines that are in background.
+    blocksize : int, optional (default: 15)
+        Size of a pixel neighborhood that is used to calculate a
+        threshold value for the pixel: 3, 5, 7, and so on.
+    c : int, optional (default: -2)
+        Constant subtracted from the mean or weighted mean.
+        Normally, it is positive but may be zero or negative as well.
+    -------
+    img : object
+        numpy.ndarray representing the original image.
+    threshold : object
+        numpy.ndarray representing the thresholded image.
+    """
+    
+    
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite("gray.png",gray)
+    if process_background:
+        threshold = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY, blocksize, c)
+    else:
+        threshold = cv2.adaptiveThreshold(
+            np.invert(gray), 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, blocksize, c)
+    return img, threshold
 
 def find_lines(threshold, regions=None, direction='horizontal',
                line_scale=15, iterations=0):
@@ -91,49 +124,36 @@ def find_lines(threshold, regions=None, direction='horizontal',
 
 
 def get_array(name):
-    #name => name of the image
 
-    image =cv2.imread("../input/"+name+".png")
-    #adaptive thresholding of the image
+
+    image =cv2.imread("./output/"+name+"_rescaled_DiagramOnly.png")
     img, threshold = adaptive_threshold(image)
-    #getting endpoints of all lines in the image
     h_dmask, h_lines = find_lines(threshold, regions=None, direction='horizontal',line_scale=15, iterations=0)
     v_dmask, v_lines = find_lines(threshold, regions=None, direction='vertical',line_scale=15, iterations=0)
-
     for l in range(len(h_lines)):
         print(h_lines[l])
     print("/////////////////")
     for l in range(len(v_lines)):
         print(v_lines[l])
-    #horizontal and vertical lines merged into one array
+    
     array_rows=np.concatenate((h_lines, v_lines))
-
     #array_rows = genfromtxt('./CSV/lines_ncert9.csv', delimiter=',')
-
     n_rows=len(array_rows)
     n_columns=len(array_rows[0])
 
-    #each row in array_row is of the form[x1,y1,x2,y2]
-    #transpose give new 2D array with 4 rows consisting of all x1,y1,x2,y2 respectively
     array_rows=array_rows.transpose()
   
-    #x_array is a numpy array which contains all the x1 and x2
-    #y_array is a numpy array which contains all the y1 and y2
+
     x_array=np.array([array_rows[0],array_rows[2]])
     y_array=np.array([array_rows[1],array_rows[3]])
 
-    #flatten converts 2D array to 1D array
     x_array=x_array.flatten()
     y_array=y_array.flatten()
-    
-    #argsort returns the indexes after the elements pf the array are sorted
-
+  
     x_sorted_indexes=np.argsort(x_array)
     y_sorted_indexes=np.argsort(y_array)
     
-    #all the group of elements in x_array and y_array which have difference less than 5 are changed to average of the elements
-    #the changes are made in the original coordinates of the lines
-    #for x_array
+
     i=0
     while (i < (len(x_sorted_indexes)-1)):
         if((x_array[x_sorted_indexes[i+1]]-x_array[x_sorted_indexes[i]])<5):
@@ -151,8 +171,9 @@ def get_array(name):
                 x_array[x_sorted_indexes[j]]=(sum/count)
             i=end-1
         i=i+1
-    
-    #for y_array
+
+
+
 
     i=0
     while (i < (len(y_sorted_indexes)-1)):
@@ -178,14 +199,15 @@ def get_array(name):
 
 
 
-    #conversion of points back into the original form after they have been edited to make their value equal to average
+
     x_array=x_array.reshape(2,n_rows)
+    
     y_array=y_array.reshape(2,n_rows)
-    #final array with 4 rows each consisting of all x1,y1,x2,y2 respectively
     final_array=np.array([x_array[0],y_array[0],x_array[1],y_array[1]])
-    #final array after transpose with each row of the form [x1,y1,x2,y2]
+    
     final_array=final_array.transpose()
     
+    final_array=final_array
     print("/////////////////")
     print(final_array)
     return final_array

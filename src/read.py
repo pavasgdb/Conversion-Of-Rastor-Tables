@@ -9,18 +9,12 @@ from rows import get_array
 import sys
 
 name=sys.argv[1]
-#get final_array from rows.py
 readCSV = get_array(name)
-#img_name => name of the image as inputted by the user on the console
 img_name=name
-#x_points contain all unique values of x1 and x2
-#y_points contsain all unique values if y1 and y2
 x_points=set()
 y_points=set()
-
 horizontal_lines=[]
 vertical_lines=[]
-
 for row in readCSV:
     for n in range(len(row)):
         row[n]=float(row[n])
@@ -32,7 +26,6 @@ for row in readCSV:
     y_points.add(float(row[1]))
     x_points.add(float(row[2]))
     y_points.add(float(row[3]))
-
 
 print("no of horizontal lines")
 print(len(horizontal_lines))
@@ -47,10 +40,7 @@ for l in range(len(vertical_lines)):
 x_set=sorted(x_points)
 y_set=sorted(y_points)
 
-x=[]
-y=[]
-x=x_set
-y=y_set
+
 print("x points are ", x_set)
 print("y points are ", y_set)
 '''
@@ -89,27 +79,26 @@ while (i<(len(y_set)-1)):
     i=i+1
 y.append(y_set[i])     
 '''
+x=x_set
+y=y_set
 print("x points are ", x)
 print("y points are ", y)
 
 n_vertical=len(vertical_lines)
 n_horizontal=len(horizontal_lines)
-#horizontal lines modified such that for each row x1<x2
+
 for h in range(len(horizontal_lines)):
     if(horizontal_lines[h][2]<horizontal_lines[h][0]):
         temp=horizontal_lines[h][0]
         horizontal_lines[h][0]=horizontal_lines[h][2]
         horizontal_lines[h][2]=temp
-#horizontal lines sorted on the basis of y and then, x
 horizontal_lines=sorted(horizontal_lines,key=itemgetter(1,0))
 
-#vertical lines modified such that for each row y1<y2
 for v in range(len(vertical_lines)):
     if(vertical_lines[v][3]<vertical_lines[v][1]):
         temp=vertical_lines[v][1]
         vertical_lines[v][1]=vertical_lines[v][3]
         vertical_lines[v][3]=temp
-#horizontal lines sorted on the basis of x and then, y
 vertical_lines=sorted(vertical_lines,key=itemgetter(0,1))
 
 print("/////////////////")
@@ -120,11 +109,7 @@ print("/////////////////")
 print(x)
 print(y)
 print("/////////////////")
-
-#h_lines is 2D array depicting the presence of each part of horizontal line
-#v_lines is 2D array depicting the presence of each part of vertical line
-# 0 denotes presence of the part of the line and 1 denotes absence of part of the line
-
+#horizontal lines
 indexes_h=[]
 horizontal_lines_np=np.array(horizontal_lines).transpose()
 h_lines=np.zeros((len(y), (len(x)-1)))
@@ -163,7 +148,6 @@ print("For Vertical Lines")
 v_lines=v_lines.transpose()
 print(v_lines)
 
-
 i=0
 j=0
 #convert to HTML
@@ -185,7 +169,7 @@ html_data = """
         <table style="border: solid 1px #000000">
         """
 
-image_obj=Image.open("../input/"+img_name+".png")
+image_obj=Image.open("./output/"+img_name+"_rescaled_TextOnly.png")
 spans=[]
 while (i<(len(h_lines)-1)):
     html_data+="""<tr>"""
@@ -205,7 +189,7 @@ while (i<(len(h_lines)-1)):
             rowspan=count_y
             colspan=count_x
             cropped_image=image_obj.crop((x[j],y[i],x[j+colspan],y[i+rowspan]))
-            cropped_image.save("../output/csv/"+str(i)+str(j)+".png")
+            #cropped_image.save("../output/csv/"+str(i)+str(j)+".png")
             str_detected=str(pytesseract.image_to_string(cropped_image, config="psm -6"))
             html_data += "<td rowspan='" + str(rowspan) + "' colspan='" + str(colspan) + "'>" + str_detected + "</td>"
             spans.append([rowspan,colspan])
@@ -214,7 +198,7 @@ while (i<(len(h_lines)-1)):
     i=i+1
 html_data += "</table></body></html>"
 
-with open("../output/csv/output_"+img_name+".html","w", encoding="utf-8") as html_fil:
+with open("./output/csv/output_"+img_name+".html","w", encoding="utf-8") as html_fil:
         html_fil.write(html_data)
 
 

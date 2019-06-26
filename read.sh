@@ -14,3 +14,5 @@ python ./src/read.py $1 > output.txt
 # Here also 2 represents the factor
 # Factor must be same at both places
 echo "Executed successfully"
+
+sleep 15s

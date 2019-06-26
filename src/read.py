@@ -10,6 +10,8 @@ import sys
 
 name=sys.argv[1]
 readCSV = get_array(name)
+if !(readCSV):
+    return
 img_name=name
 x_points=set()
 y_points=set()

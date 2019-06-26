@@ -6,7 +6,7 @@ from PIL import Image
 import pytesseract
 import cv2
 from numpy import genfromtxt
-
+from unstructured_tables import no_borders,incomplete_borders
 
 
 
@@ -129,6 +129,12 @@ def get_array(name):
     image =cv2.imread("./output/"+name+"_rescaled_DiagramOnly.png")
     img, threshold = adaptive_threshold(image)
     h_dmask, h_lines = find_lines(threshold, regions=None, direction='horizontal',line_scale=15, iterations=0)
+    
+    if(len(h_lines)==0):
+        return no_borders(name)
+    if(len(h_lines)<4):
+        return incomplete_borders(name)
+
     v_dmask, v_lines = find_lines(threshold, regions=None, direction='vertical',line_scale=15, iterations=0)
     for l in range(len(h_lines)):
         print(h_lines[l])

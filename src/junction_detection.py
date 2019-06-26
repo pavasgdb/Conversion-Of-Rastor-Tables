@@ -200,6 +200,7 @@ def get_junctions(path,img_name,factor):
     h_dmask, h_lines = find_lines(threshold, regions=None, direction='horizontal',line_scale=15, iterations=0)
     v_dmask, v_lines = find_lines(threshold, regions=None, direction='vertical',line_scale=15, iterations=0)
     cont = find_contours(v_dmask, h_dmask)
+    print(cont)
     joints,x_set,y_set = find_joints(cont, v_dmask, h_dmask)
 
     if((len(y_set)<=3)&(len(y_set)>0)):

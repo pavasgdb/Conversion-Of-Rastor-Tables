@@ -86,5 +86,5 @@ def convert(matrix, image_obj,path_op,img_name):
     html_data += "</tr>"
     html_data += "</table></body></html>"
 
-    with open(path_op+img_name+".html","w", encoding="utf-8") as html_fil:
+    with open(path_op+"csv/output_"+img_name+".html","w", encoding="utf-8") as html_fil:
         html_fil.write(html_data)
